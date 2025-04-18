@@ -1,0 +1,55 @@
+{
+    "messages":{
+        "start": "start message",
+        "solo/team": "solo or team?",
+        "solo-start": "enter your name",
+        "team-start": "enter your team name",
+        "team-members": "enter your team members name on different lines",
+        "success": "successfully registrated!",
+        "not-registrated": "you are not registrated. registrate with /start",
+        "unfinished": "you have an unfinished station.",
+        "choose": "choose station from following list",
+        "already": "you are already registrated. to choose station send /choose",
+        "sure": "are you finally registrate on this station",
+        "dont_want": "OK, choose another station then :-)",
+        "enter-finishcode": "enter finishcode for station ",
+        "finished": "station successfully finished",
+        "people": "enter your team size",
+        "full": "the location is full. please, try again in ~ 15min"
+    },
+
+    "database":{
+        "host": "localhost",
+        "port": 3306,
+        "user": "root",
+        "password": "glebocrew",
+        "database": "lyceum_birthday"
+    },
+
+    "stations":{
+        "1":{
+            "id": "1",
+            "name": "[ Station 1 Name Field ]",
+            "description": "[ Station 1 Description Field ]",
+            "quote": "[ Station 1 Quote Field ]",
+            "finish-code": "[ Station 1 Finish Code ]",
+            "tip": "[ Station 1 Tip Field ]",
+            "time-start" : ["13:30", "13:45"],
+            "time-finish" : ["13:45", "14:00"],
+            "filepath": "files/Test.pdf",
+            "max-people": 1
+        },
+        "2":{
+            "id": "2",
+            "name": "[ Station 2 Name Field ]",
+            "description": "[ Station 2 Description Field ]",
+            "quote": "[ Station 2 Quote Field ]",
+            "finish-code": "[ Station 2 Finish Code ]",
+            "tip": "[ Station 2 Tip Field ]",
+            "time-start" : ["14:00", "14:30"],
+            "time-finish" : ["14:15", "14:45"],
+            "filepath": "none",
+            "max-people": 1
+        }
+    }
+}
