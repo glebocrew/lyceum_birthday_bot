@@ -45,5 +45,5 @@ USE db;
 ```
 
 ```sql
-CREATE TABLE users(username VARCHAR(64), team_name TEXT, team_members TEXT, stations TEXT, current_station TEXT, team_size INT, id:INT);
+CREATE TABLE users(username VARCHAR(64), team_name TEXT, team_members TEXT, stations TEXT, current_station TEXT, team_size INT, id INT);
 ```

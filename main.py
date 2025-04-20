@@ -153,6 +153,18 @@ def text(message):
     else:
         bot.send_message(message.chat.id, messages["not-registrated"])
 
+@bot.message_handler(commands=['finish'])
+def finish(message):
+    keyboard = InlineKeyboardMarkup()
+    yes = InlineKeyboardButton(text="Да", callback_data="FINISH_ALL")
+    no = InlineKeyboardButton(text="Нет", callback_data="missclick")
+
+    keyboard.add(yes)
+    keyboard.add(no)
+
+    bot.send_message(message.chat.id, "Вы уверены что хотите закончить игру?", reply_markup=keyboard)
+
+
 # callback
 @bot.callback_query_handler(func = lambda call: True)
 def callback(call):
@@ -225,6 +237,12 @@ def callback(call):
 
     elif call.data == "dont_want" and users.get_info(call.from_user.username)[0][4] == "0":
         bot.send_message(call.message.chat.id, messages["dont_want"])
+
+    elif call.data == "FINISH_ALL":
+        bot.send_message(call.message.chat.id, messages["final"])
+    
+    elif call.data == "missclick":
+        bot.send_message(call.message.chat.id, messages["missclick"])
 
 def finish(message, station):
     attempt = ""
