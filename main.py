@@ -63,10 +63,11 @@ def start(message):
 ## solo registration
 def solo_registration(message):
     bot.send_message(message.chat.id, messages["solo-start"])
-    bot.register_next_step_handler(message, solo_registration_2)
+    bot.clear_step_handler_by_chat_id(message.chat.id)
+    bot.register_next_step_handler_by_chat_id(message.chat.id, solo_registration_2)
 
 def solo_registration_2(message):
-    users.insert(message.chat.username, message.text, message.text)
+    users.insert(message.chat.username, message.text, message.text, message.chat.id)
     users.team_size(message.chat.username, 1)
     bot.send_message(message.chat.id, text=messages["success"])
 
@@ -74,38 +75,53 @@ def solo_registration_2(message):
 ## team registration
 def team_registration(message):
     bot.send_message(message.chat.id, messages["team-start"])
-    bot.register_next_step_handler(message, team_registration_2)
+    bot.clear_step_handler_by_chat_id(message.chat.id)
+    bot.register_next_step_handler_by_chat_id(message.chat.id, team_registration_2)
 
 def team_registration_2(message):
     bot.send_message(message.chat.id, messages["team-members"])
-    bot.register_next_step_handler(message, team_registration_3)
+    bot.clear_step_handler_by_chat_id(message.chat.id)
+    bot.register_next_step_handler_by_chat_id(message.chat.id, team_registration_3)
 
 def team_registration_3(message):
-    users.insert(message.chat.username, message.text, message.text)
+    users.insert(message.chat.username, message.text, message.text, message.chat.id)
     bot.send_message(message.chat.id, text=messages["people"])
-    bot.register_next_step_handler(message, team_registration_4)
+    bot.clear_step_handler_by_chat_id(message.chat.id)
+    bot.register_next_step_handler_by_chat_id(message.chat.id, team_registration_4)
 
 def team_registration_4(message):
-    users.team_size(message.chat.username, message.text)
+    size_raw = message.text
+    size = ""
+    for integer in size_raw:
+        if integer in "1234567890":
+            size += integer
+    size = int(size)
+    users.team_size(message.chat.username, size)
     bot.send_message(message.chat.id, text=messages["success"])
 
 @bot.message_handler(commands=['choose'])
 def choose(message):
+    bot.clear_step_handler_by_chat_id(message.chat.id)
     print(users.get_info(message.chat.username))
     if users.get_info(message.chat.username) != -1:
         if users.get_info(message.chat.username)[0][4] == "0":
             markup = InlineKeyboardMarkup()
-
+            pts = 0
             for station in stations:
                 if not(station in users.get_info(message.chat.username)[0][3].split(sep=" ")) and users.get_all_users_on_station(stations[station]["id"]) < stations[station]["max-people"]:
                     button = InlineKeyboardButton(text=stations[station]["name"], callback_data=f"station:{stations[station]['id']}")
                     markup.add(button)
+                    pts += 1
+            if pts != 0:
+                bot.send_message(message.chat.id, messages["choose"], reply_markup=markup)
+            else:
 
-            bot.send_message(message.chat.id, messages["choose"], reply_markup=markup)
+                bot.send_message(message.chat.id, messages["final"], reply_markup=markup)
+                
         else:
             current_station = users.get_info(message.chat.username)[0][4]
             keyboard = InlineKeyboardMarkup()
-            tip = InlineKeyboardButton("get tip", callback_data=f"tip:{current_station}")
+            tip = InlineKeyboardButton("Получить подсказку", callback_data=f"tip:{current_station}")
         
             keyboard.add(tip)
             bot.send_message(message.chat.id, messages['unfinished'], reply_markup=keyboard)
@@ -114,8 +130,9 @@ def choose(message):
         bot.send_message(message.chat.id, messages["not-registrated"])
 
     elif current_station != "0":
-        bot.send_message(message.chat.id, messages["enter-finishcode"] + current_station, reply_markup=keyboard)
-        bot.register_next_step_handler(message, finish, station=current_station)
+        bot.send_message(message.chat.id, messages["enter-finishcode"], reply_markup=keyboard)
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        bot.register_next_step_handler_by_chat_id(message.chat.id, finish, station=current_station)
             
     else:
         bot.send_message(message.chat.id, messages["not-registrated"])
@@ -126,12 +143,13 @@ def text(message):
     
         current_station = users.get_info(message.chat.username)[0][4]
         keyboard = InlineKeyboardMarkup()
-        tip = InlineKeyboardButton("get tip", callback_data=f"tip:{current_station}")
+        tip = InlineKeyboardButton("Получить подсказку", callback_data=f"tip:{current_station}")
         keyboard.add(tip)
 
-        if current_station != "0":
-            bot.send_message(message.chat.id, messages["enter-finishcode"] + current_station, reply_markup=keyboard)
-            bot.register_next_step_handler(message, finish, station=current_station)
+        if current_station != "0" and current_station != "-1":
+            bot.send_message(message.chat.id, messages["enter-finishcode"], reply_markup=keyboard)
+            bot.clear_step_handler_by_chat_id(message.chat.id)
+            bot.register_next_step_handler_by_chat_id(message.chat.id, finish, station=current_station)
     else:
         bot.send_message(message.chat.id, messages["not-registrated"])
 
@@ -172,8 +190,8 @@ def callback(call):
                         except:
                             bot.send_message(call.message.chat.id, "File not found :/")
                     keyboard = InlineKeyboardMarkup()
-                    yes = InlineKeyboardButton("yes", callback_data=f"finish:{station_id}")
-                    no = InlineKeyboardButton("no", callback_data=f"dont_want")
+                    yes = InlineKeyboardButton("Да!🔥", callback_data=f"finish:{station_id}")
+                    no = InlineKeyboardButton("Нет.", callback_data=f"dont_want")
 
                     keyboard.add(yes)
                     keyboard.add(no)
@@ -184,46 +202,60 @@ def callback(call):
                     bot.send_message(call.message.chat.id, messages["full"])
                     break
         else:
-            bot.send_message(call.message.chat.id, "Не время")
+            bot.send_message(call.message.chat.id, messages["not-time"])
     elif call.data.split(sep=":")[0] == "finish":
         station_id = call.data.split(sep=":")[1]
         users.set_current(call.message.chat.username, station_id)
 
         keyboard = InlineKeyboardMarkup()
-        tip = InlineKeyboardButton("get tip", callback_data=f"tip:{station_id}")
+        tip = InlineKeyboardButton("Получить подсказку", callback_data=f"tip:{station_id}")
 
-        bot.send_message(call.message.chat.id, messages["enter-finishcode"] + station_id, reply_markup=keyboard)
-        bot.register_next_step_handler(call.message, finish, station=call.data.split(sep=":")[1])
+        keyboard.add(tip)
+
+        bot.send_message(call.message.chat.id, messages["enter-finishcode"], reply_markup=keyboard)
+        bot.clear_step_handler_by_chat_id(call.message.chat.id)
+        bot.register_next_step_handler_by_chat_id(call.message.chat.id, finish, station=call.data.split(sep=":")[1])
     elif call.data.split(sep=":")[0] == "tip":
         station_id = call.data.split(sep=":")[1]
-        bot.send_message(call.message.chat.id, stations[station_id]["quote"])
-        bot.send_message(call.message.chat.id, messages["enter-finishcode"] + station_id)
+        bot.send_message(call.message.chat.id, stations[station_id]["tip"])
+        bot.send_message(call.message.chat.id, messages["enter-finishcode"])
 
-        bot.register_next_step_handler(call.message, finish, station=call.data.split(sep=":")[1])
-    elif call.data == "dont_want":
+        bot.clear_step_handler_by_chat_id(call.message.chat.id)
+        bot.register_next_step_handler_by_chat_id(call.message.chat.id, finish, station=call.data.split(sep=":")[1])
+
+    elif call.data == "dont_want" and users.get_info(call.from_user.username)[0][4] == "0":
         bot.send_message(call.message.chat.id, messages["dont_want"])
 
 def finish(message, station):
     attempt = ""
+    finish = ""
 
     for s in message.text.lower():
-        if not(s in ",.!-"):
+        if not(s in ",.!-—–- "):
             attempt += s
+    for n in stations[station]["finish-code"].lower():
+        if not(n in ",.!-—–- "):
+            finish += n
+    
     print(f"User attempt: {attempt}")
-    print(f"Finish code: {stations[station]["finish-code"].lower()}")
-    if attempt == stations[station]["finish-code"].lower():
+    print(f"Finish code: {finish}")
+    if attempt == finish:
         users.set_current(message.chat.username, "0")
         users.add(message.chat.username, station)
         bot.send_message(message.chat.id, messages["finished"])
+        bot.send_message(message.chat.id, stations[station]["finish-link"])
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+
     else:
         keyboard = InlineKeyboardMarkup()
-        tip = InlineKeyboardButton("get tip", callback_data=f"tip:{station}")
-        
+        tip = InlineKeyboardButton("Получить подсказку", callback_data=f"tip:{station}")
         keyboard.add(tip)
 
-        bot.send_message(message.chat.id, "Incorrect")
+        bot.send_message(message.chat.id, messages["incorrect"])
         bot.send_message(message.chat.id, messages["enter-finishcode"], reply_markup=keyboard)
-        bot.register_next_step_handler(message, finish, station=station)
+        bot.clear_step_handler_by_chat_id(message.chat.id)
+        bot.register_next_step_handler_by_chat_id(message.chat.id, finish, station=station)
+        return 0
 
 
 

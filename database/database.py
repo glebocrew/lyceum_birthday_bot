@@ -42,11 +42,22 @@ class Users:
     def set_current(self, username, station):
         self.mariaconnection.cursor.execute("UPDATE users SET current_station = ? WHERE username = ?", [station, username])
     
-    def insert(self, username, team_name, team_members):
-        self.mariaconnection.cursor.execute("INSERT INTO users (username, team_name, team_members, stations, current_station) VALUES (?, ?, ?, ?, ?)", (username, team_name, team_members, 0, 0))
+    def insert(self, username, team_name, team_members, id):
+        self.mariaconnection.cursor.execute("INSERT INTO users (username, team_name, team_members, stations, current_station, id) VALUES (?, ?, ?, ?, ?, ?)", (username, team_name, team_members, 0, 0, id))
     
     def team_size(self, username, size):
         self.mariaconnection.cursor.execute("UPDATE users SET team_size = ? WHERE username = ?", [size, username])
 
     def add(self, username, station):
         self.mariaconnection.cursor.execute("UPDATE users SET stations = (CONCAT(stations, ' ', ?)) WHERE username = ?", [station, username])
+
+    def get_all_0_users(self):
+        self.mariaconnection.cursor.execute("SELECT id FROM users WHERE current_station = '0'")
+        return self.mariaconnection.cursor.fetchall()
+    
+    def get_all_resident_users(self):
+        self.mariaconnection.cursor.execute("SELECT id FROM users WHERE current_station = '0' AND NOT (stations LIKE '% -1 %')")
+        return self.mariaconnection.cursor.fetchall()
+    
+    def set_current_by_id(self, id, station):
+        self.mariaconnection.cursor.execute("UPDATE users SET current_station = ? WHERE id = ?", [station, id])
