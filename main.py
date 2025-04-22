@@ -125,6 +125,7 @@ def choose(message):
         
             keyboard.add(tip)
             bot.send_message(message.chat.id, messages['unfinished'], reply_markup=keyboard)
+            bot.register_next_step_handler_by_chat_id(message.chat.id, finish, station=users.get_info(message.chat.username)[0][4])
 
     elif users.get_info(message.chat.username) != []:
         bot.send_message(message.chat.id, messages["not-registrated"])
