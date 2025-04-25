@@ -292,18 +292,18 @@ def finish(message, station):
     users = Users(mariaconnection)
 
     attempt = ""
-    finish = ""
+    finish_code = ""
 
     for s in message.text.lower():
         if not(s in ",.!-—–- '\""):
             attempt += s
     for n in stations[station]["finish-code"].lower():
         if not(n in ",.!-—–- '\""):
-            finish += n
+            finish_code += n
     
     # print(f"User attempt: {attempt}")
     # print(f"Finish code: {finish}")
-    if attempt == finish:
+    if attempt == finish_code:
         users.set_current(message.chat.username, "0")
         users.add(message.chat.username, station)
         bot.send_message(message.chat.id, stations[station]["finish-link"])
