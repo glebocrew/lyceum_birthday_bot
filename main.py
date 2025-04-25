@@ -319,7 +319,6 @@ def finish(message, station):
         bot.send_message(message.chat.id, messages["enter-finishcode"], reply_markup=keyboard)
         bot.clear_step_handler_by_chat_id(message.chat.id)
         bot.register_next_step_handler_by_chat_id(message.chat.id, finish, station=station)
-        return 0
     
     mariaconnection.mariaconnection.close()
 
