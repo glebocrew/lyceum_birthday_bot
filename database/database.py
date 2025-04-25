@@ -12,7 +12,7 @@ class MariaConnection:
             self.mariaconnection.autocommit = True
             self.cursor = Cursor(self.mariaconnection)
         except mariadb.ProgrammingError as e:
-            print(e)
+            # print(e)
             print("Attributes are wrong! Check spelling and that attrs are placed only as [host, port, user, password, database]")
             exit(0)
 
@@ -34,8 +34,8 @@ class Users:
         
     def get_all_users_on_station(self, station_id):
         self.mariaconnection.cursor.execute("SELECT SUM(team_size) FROM users WHERE current_station = ?", [station_id])
-        print((self.mariaconnection.cursor.fetchall()))
-        print(len(self.mariaconnection.cursor.fetchall()))
+        # print((self.mariaconnection.cursor.fetchall()))
+        # print(len(self.mariaconnection.cursor.fetchall()))
 
         return len(self.mariaconnection.cursor.fetchall())
     

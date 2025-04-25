@@ -48,7 +48,7 @@ def start(message):
     mariaconnection = MariaConnection(configures["database"])
     users = Users(mariaconnection)
 
-    print(users.get_info(message.chat.username))
+    # print(users.get_info(message.chat.username))
     if users.get_info(message.chat.username) == -1:
         bot.send_message(message.chat.id, messages['start'])
         
@@ -129,7 +129,7 @@ def choose(message):
     users = Users(mariaconnection)
 
     bot.clear_step_handler_by_chat_id(message.chat.id)
-    print(users.get_info(message.chat.username))
+    # print(users.get_info(message.chat.username))
     if users.get_info(message.chat.username) != -1:
         if users.get_info(message.chat.username)[0][4] == "0":
             markup = InlineKeyboardMarkup()
@@ -217,13 +217,13 @@ def callback(call):
         station_id = call.data.split(sep=":")[1]
         now_moscow = datetime.now(moscow_tz)
         for iterator in range(len(stations[station_id]["time-start"])):
-            print(f"start time {iterator}: {int(stations[station_id]["time-start"][iterator].split(":")[0]) * 60 +\
-            int(stations[station_id]["time-start"][iterator].split(":")[1])}")
+            # print(f"start time {iterator}: {int(stations[station_id]["time-start"][iterator].split(":")[0]) * 60 +\
+            # int(stations[station_id]["time-start"][iterator].split(":")[1])}")
 
-            print(f"finish time {iterator}: {int(stations[station_id]["time-finish"][iterator].split(":")[0]) * 60 +\
-            int(stations[station_id]["time-finish"][iterator].split(":")[1])}")
+            # print(f"finish time {iterator}: {int(stations[station_id]["time-finish"][iterator].split(":")[0]) * 60 +\
+            # int(stations[station_id]["time-finish"][iterator].split(":")[1])}")
 
-            print(f"current time: {now_moscow.hour * 60 + now_moscow.minute}")
+            # print(f"current time: {now_moscow.hour * 60 + now_moscow.minute}")
 
 
             if (int(stations[station_id]["time-start"][iterator].split(":")[0]) * 60 +\
@@ -301,13 +301,13 @@ def finish(message, station):
         if not(n in ",.!-—–- '\""):
             finish += n
     
-    print(f"User attempt: {attempt}")
-    print(f"Finish code: {finish}")
+    # print(f"User attempt: {attempt}")
+    # print(f"Finish code: {finish}")
     if attempt == finish:
         users.set_current(message.chat.username, "0")
         users.add(message.chat.username, station)
-        bot.send_message(message.chat.id, messages["finished"])
         bot.send_message(message.chat.id, stations[station]["finish-link"])
+        bot.send_message(message.chat.id, messages["finished"])
         bot.clear_step_handler_by_chat_id(message.chat.id)
 
     else:
