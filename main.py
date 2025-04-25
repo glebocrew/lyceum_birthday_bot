@@ -34,6 +34,9 @@ except mariadb.ProgrammingError as e:
     exit(0)
 
 
+mariaconnection.mariaconnection.close()
+print("Test Connection Closed Successfully!")
+
 API = open("API.txt", 'r').read().split(sep="\n")[0]
 messages = configures['messages']
 stations = configures['stations']
@@ -42,6 +45,9 @@ bot = TeleBot(API)
 
 @bot.message_handler(commands=['start'])
 def start(message):
+    mariaconnection = MariaConnection(configures["database"])
+    users = Users(mariaconnection)
+
     print(users.get_info(message.chat.username))
     if users.get_info(message.chat.username) == -1:
         bot.send_message(message.chat.id, messages['start'])
@@ -59,6 +65,9 @@ def start(message):
 
         bot.send_message(message.chat.id, messages['already'])
 
+    mariaconnection.mariaconnection.close()
+    
+
 # funcs
 ## solo registration
 def solo_registration(message):
@@ -67,9 +76,14 @@ def solo_registration(message):
     bot.register_next_step_handler_by_chat_id(message.chat.id, solo_registration_2)
 
 def solo_registration_2(message):
+    mariaconnection = MariaConnection(configures["database"])
+    users = Users(mariaconnection)
+
     users.insert(message.chat.username, message.text, message.text, message.chat.id)
     users.team_size(message.chat.username, 1)
     bot.send_message(message.chat.id, text=messages["success"])
+
+    mariaconnection.mariaconnection.close()
 
 
 ## team registration
@@ -84,12 +98,20 @@ def team_registration_2(message):
     bot.register_next_step_handler_by_chat_id(message.chat.id, team_registration_3)
 
 def team_registration_3(message):
+    mariaconnection = MariaConnection(configures["database"])
+    users = Users(mariaconnection)
+
     users.insert(message.chat.username, message.text, message.text, message.chat.id)
     bot.send_message(message.chat.id, text=messages["people"])
     bot.clear_step_handler_by_chat_id(message.chat.id)
     bot.register_next_step_handler_by_chat_id(message.chat.id, team_registration_4)
 
+    mariaconnection.mariaconnection.close()
+
 def team_registration_4(message):
+    mariaconnection = MariaConnection(configures["database"])
+    users = Users(mariaconnection)
+
     size_raw = message.text
     size = ""
     for integer in size_raw:
@@ -99,8 +121,13 @@ def team_registration_4(message):
     users.team_size(message.chat.username, size)
     bot.send_message(message.chat.id, text=messages["success"])
 
+    mariaconnection.mariaconnection.close()
+
 @bot.message_handler(commands=['choose'])
 def choose(message):
+    mariaconnection = MariaConnection(configures["database"])
+    users = Users(mariaconnection)
+
     bot.clear_step_handler_by_chat_id(message.chat.id)
     print(users.get_info(message.chat.username))
     if users.get_info(message.chat.username) != -1:
@@ -137,9 +164,26 @@ def choose(message):
             
     else:
         bot.send_message(message.chat.id, messages["not-registrated"])
+    
+    mariaconnection.mariaconnection.close()
 
+
+@bot.message_handler(commands=['finish'])
+def finish_command(message):
+    keyboard = InlineKeyboardMarkup()
+    yes = InlineKeyboardButton(text="Да", callback_data="FINISH_ALL")
+    no = InlineKeyboardButton(text="Нет", callback_data="missclick")
+
+    keyboard.add(yes)
+    keyboard.add(no)
+
+    bot.send_message(message.chat.id, "Вы уверены что хотите закончить игру?", reply_markup=keyboard)
+    
 @bot.message_handler()
 def text(message):
+    mariaconnection = MariaConnection(configures["database"])
+    users = Users(mariaconnection)
+
     if users.get_info(message.chat.username) != -1:
     
         current_station = users.get_info(message.chat.username)[0][4]
@@ -153,22 +197,17 @@ def text(message):
             bot.register_next_step_handler_by_chat_id(message.chat.id, finish, station=current_station)
     else:
         bot.send_message(message.chat.id, messages["not-registrated"])
+    
+    mariaconnection.mariaconnection.close()
 
-@bot.message_handler(commands=['finish'])
-def finish(message):
-    keyboard = InlineKeyboardMarkup()
-    yes = InlineKeyboardButton(text="Да", callback_data="FINISH_ALL")
-    no = InlineKeyboardButton(text="Нет", callback_data="missclick")
-
-    keyboard.add(yes)
-    keyboard.add(no)
-
-    bot.send_message(message.chat.id, "Вы уверены что хотите закончить игру?", reply_markup=keyboard)
 
 
 # callback
 @bot.callback_query_handler(func = lambda call: True)
 def callback(call):
+    mariaconnection = MariaConnection(configures["database"])
+    users = Users(mariaconnection)
+
     if call.data.split(sep=":")[0] == "start":
         if call.data.split(sep=":")[1] == "solo":
             solo_registration(call.message)
@@ -244,16 +283,22 @@ def callback(call):
     
     elif call.data == "missclick":
         bot.send_message(call.message.chat.id, messages["missclick"])
+    
+    mariaconnection.mariaconnection.close()
+
 
 def finish(message, station):
+    mariaconnection = MariaConnection(configures["database"])
+    users = Users(mariaconnection)
+
     attempt = ""
     finish = ""
 
     for s in message.text.lower():
-        if not(s in ",.!-—–- "):
+        if not(s in ",.!-—–- '\""):
             attempt += s
     for n in stations[station]["finish-code"].lower():
-        if not(n in ",.!-—–- "):
+        if not(n in ",.!-—–- '\""):
             finish += n
     
     print(f"User attempt: {attempt}")
@@ -275,6 +320,8 @@ def finish(message, station):
         bot.clear_step_handler_by_chat_id(message.chat.id)
         bot.register_next_step_handler_by_chat_id(message.chat.id, finish, station=station)
         return 0
+    
+    mariaconnection.mariaconnection.close()
 
 
 

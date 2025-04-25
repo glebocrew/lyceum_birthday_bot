@@ -55,7 +55,7 @@ def check_time_and_send():
             
             print(now_moscow.hour * 60 + now_moscow.minute)
 
-            if now_moscow.hour * 60 + now_moscow.minute == int(resident["time"]["time-start"][iterator].split(sep=":")[0]) * 60 + \
+            if now_moscow.hour * 60 + now_moscow.minute + 10 == int(resident["time"]["time-start"][iterator].split(sep=":")[0]) * 60 + \
                 int(resident["time"]["time-start"][iterator].split(sep=":")[1]):
                 sent_users = []
                 for x in range(RESIDENTS):
