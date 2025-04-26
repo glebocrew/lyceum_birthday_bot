@@ -233,8 +233,8 @@ def callback(call):
             int(stations[station_id]["time-finish"][iterator].split(":")[0]) * 60 +\
             int(stations[station_id]["time-finish"][iterator].split(":")[1]):
                 if users.get_all_users_on_station(station_id) + users.get_info(call.message.chat.username)[0][5] <= stations[station_id]["max-people"]:
-                    bot.send_message(call.message.chat.id, stations[station_id]["description"])
-                    bot.send_message(call.message.chat.id, stations[station_id]["quote"])
+                    bot.send_message(call.message.chat.id, "<b>Описание локации</b>\n" + stations[station_id]["description"], parse_mode="HTML")
+                    bot.send_message(call.message.chat.id, "<b>Цитата подсказка к локации</b>\n" + stations[station_id]["quote"], parse_mode="HTML")
                     if stations[station_id]["filepath"] != "none":
                         try:
                             file = open(stations[station_id]["filepath"], "rb")
