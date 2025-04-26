@@ -31,19 +31,6 @@
     },
 
     "stations":{
-        "1":{
-            "id": "1",
-            "name": "[ Test Station ]",
-            "description": "[ Station 1 Description Field ]",
-            "quote": "[ Station 1 Quote Field ]",
-            "finish-code": "[ Station 1 Finish Code ]",
-            "tip": "[ Station 1 Tip Field ]",
-            "time-start" : ["00:00"],
-            "time-finish" : ["23:59"],
-            "filepath": "files/Test.pdf",
-            "finish-link": "glebocrew.ru",
-            "max-people": 3
-        },
         "2":{
             "id": "2",
             "name": "Чуковский",
@@ -80,7 +67,7 @@
             "time-start" :  ["11:20", "12:00", "12:40", "12:30", "13:00"],
             "time-finish" : ["12:00", "12:40", "13:20", "12:45", "13:15"],
             "filepath": "files/Алфавит.pdf",
-            "finish-link": "none",
+            "finish-link": "Пусть вдохновение всегда будет с вами.",
             "max-people": 15
         },
         "5":{
